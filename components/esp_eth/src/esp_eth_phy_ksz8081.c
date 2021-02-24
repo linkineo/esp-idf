@@ -56,6 +56,30 @@ typedef union {
 } pc1r_reg_t;
 #define ETH_PHY_PC1R_REG_ADDR (0x1E)
 
+typedef union {
+    struct {
+   
+            uint32_t scramble : 1;
+            uint32_t sqe : 1;
+            uint32_t rem_loo : 1;
+            uint32_t disa_tra : 1;
+            uint32_t led_mode : 2;
+            uint32_t res2 : 1;
+            uint32_t rmii_clock_ref : 1;
+            uint32_t jabber : 1;
+            uint32_t interr : 1;
+            uint32_t power_sav : 1;
+            uint32_t force_link : 1;
+            uint32_t res1 : 1;
+            uint32_t pair_swap_d : 1;
+            uint32_t mdi_x : 1;
+            uint32_t hp_mdix : 1;
+
+    };
+    uint32_t val;
+} pc2r_reg_t;
+#define ETH_PHY_PC2R_REG_ADDR (0x1F)
+
 typedef struct {
     esp_eth_phy_t parent;
     esp_eth_mediator_t *eth;
@@ -75,6 +99,16 @@ static esp_err_t ksz8081_update_link_duplex_speed(phy_ksz8081_t *ksz8081)
     anlpar_reg_t anlpar;
     bmsr_reg_t bmsr;
     pc1r_reg_t pc1r;
+
+    pc2r_reg_t pc2r;
+    PHY_CHECK(eth->phy_reg_read(eth, ksz8081->addr, ETH_PHY_PC2R_REG_ADDR, &(pc2r.val)) == ESP_OK,
+              "read PC2R failed", err);
+    printf("PYH READ PC2R %x", pc2r.val);
+    pc2r.rmii_clock_ref = 1;
+    PHY_CHECK(eth->phy_reg_write(eth, ksz8081->addr, ETH_PHY_PC2R_REG_ADDR, pc2r.val) == ESP_OK,
+              "write PC2R failed", err);
+    printf("PYH WROTE PC2R %x", pc2r.val);
+
     PHY_CHECK(eth->phy_reg_read(eth, ksz8081->addr, ETH_PHY_ANLPAR_REG_ADDR, &(anlpar.val)) == ESP_OK,
               "read ANLPAR failed", err);
     PHY_CHECK(eth->phy_reg_read(eth, ksz8081->addr, ETH_PHY_BMSR_REG_ADDR, &(bmsr.val)) == ESP_OK,
